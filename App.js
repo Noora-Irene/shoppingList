@@ -1,6 +1,7 @@
 import React, { useState, useEffect} from 'react';
-import { StatusBar, StyleSheet, View, Text, TextInput, Button, FlatList } from 'react-native';
+import { StatusBar, StyleSheet, View, Text, FlatList } from 'react-native';
 import * as SQLite from 'expo-sqlite';
+import { ThemeProvider, Input, Button, ListItem } from 'react-native-elements';
 
 const db = SQLite.openDatabase('shoppingdb.db');
 
@@ -12,7 +13,7 @@ export default function App() {
 
   useEffect(() => {
     db.transaction(tx => {
-      tx.executeSql('create table if not exists shopping (id integer primary key not null, amount int, product text);');
+      tx.executeSql('create table if not exists shopping (id integer primary key not null, amount text, product text);');
     }, null, updateList);    
   }, []);
 
@@ -31,7 +32,7 @@ export default function App() {
   }
   const addOnList = () => {
     db.transaction(tx => {
-      tx.executeSql('insert into shopping (amount, product) values (?, ?);', [parseInt(amount), product]);
+      tx.executeSql('insert into shopping (amount, product) values (?, ?);', [amount, product]);
     }, null, updateList
     )
     setProduct('');
@@ -48,80 +49,66 @@ export default function App() {
 
   return (
     <View style={styles.wholeScreen}>
+    <ThemeProvider theme={theme}>
       <StatusBar hidden={true} />
         <View style={styles.inputArea}>
-          <TextInput style={styles.input} placeholder= 'Product' onChangeText={input1} value={product}
+          <Input placeholder= 'Product' label='PRODUCT' onChangeText={input1} value={product}
           />
-          <TextInput style={styles.input} placeholder= 'Amount' onChangeText={input2} value={amount}
+          <Input placeholder= 'Amount e.g. pcs, kg' label='AMOUNT' onChangeText={input2} value={amount}
           />
         </View>
         <View style={styles.buttonArea}>
-          <View style={styles.button}>
             <Button title="ADD" onPress={addOnList} />
-          </View>
-         {/*} <View style={styles.button}>
-            <Button title="CLEAR" color= 'red' onPress={deleteall} />
-          </View> */}
+         {/*}
+            <Button title="CLEAR" onPress={deleteall} />
+         */}
         </View>
-          <View style={styles.title}><Text style={styles.titleText}>Shopping list</Text></View>
+        <View style={styles.listArea}>
+          <Text style={styles.titleText}>Shopping list</Text>
             <FlatList
-              keyExtractor={item => item.id.toString()}
-              renderItem={ ({ item }) =>
-              <View style={styles.listArea}>
-                <Text style={styles.listText}> {item.product}, {item.amount} </Text> 
-                <Text style={styles.deleteText} onPress={() => deleteItem(item.id) }> Bought </Text>
-              </View> }
               data={productList}
+              keyExtractor={item => item.id.toString()}
+              renderItem={ ({ item }) => 
+              <ListItem
+                title= {item.product} rightSubtitle={item.amount} 
+                rightIcon= {{ name: 'delete-sweep' }} onPress={() => deleteItem(item.id) }
+                bottomDivider
+              /> }
             />
+        </View>
+        </ThemeProvider>
     </View>
   );
 }
+const theme = {
+  Button: {
+    containerStyle: {
+    marginTop: 20
+    },
+    titleStyle: {
+      color: 'cornsilk'
+    },
+  },
+};
 const styles = StyleSheet.create({
   wholeScreen: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center'
+    justifyContent: 'center'
   },
   inputArea: {
-    flex: 1,
-    justifyContent: 'flex-end'
+    flex: 1
   },
   buttonArea: {
-    flex: 1,
-    flexDirection: 'row',
-    marginTop: 20,
-    justifyContent: 'flex-end'
+    flex: 1
   },
-  title: {
-    flex: 1,
-    justifyContent: 'flex-start'
+  listArea: {
+    flex: 3
   },
   titleText: {
     fontSize: 22,
-    color: 'purple',
-    fontWeight: 'bold'
-  },
-  listArea: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    justifyContent: 'flex-start'
-  },
-  listText: {
-    fontSize: 16,
-    color: 'purple'
-  },
-  deleteText: {
-    fontSize: 16,
-    color: 'blue'
-  },
-  input: {
-    width: 200,
-    borderColor: 'black',
-    borderWidth: 1,
-    marginBottom: 10 
-  },
-  button: {
-    width: '20%'
+    color: '#c71585',
+    fontWeight: 'bold',
+    marginLeft: 15
   }
 });
