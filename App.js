@@ -46,6 +46,18 @@ export default function App() {
     )    
   }
   // const deleteall = (id) => {  }
+  const listSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 2,
+          width: '100%',
+          backgroundColor: "purple"
+        }}
+      />
+    );
+  };
+
 
   return (
     <View style={styles.wholeScreen}>
@@ -68,6 +80,7 @@ export default function App() {
             <FlatList
               data={productList}
               keyExtractor={item => item.id.toString()}
+              ItemSeparatorComponent={listSeparator}
               renderItem={ ({ item }) => 
               <ListItem
                 title= {item.product} rightSubtitle={item.amount} 
@@ -93,8 +106,7 @@ const theme = {
 const styles = StyleSheet.create({
   wholeScreen: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center'
+    backgroundColor: '#fff'
   },
   inputArea: {
     flex: 1
